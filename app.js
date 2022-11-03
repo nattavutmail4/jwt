@@ -2,8 +2,8 @@ const express = require('express');
 const server  = express();
 const token_manager = require('./route/token_manager');
 const mysql = require('mysql');
+const  axios = require('axios');
 
-const  axios = require('axios').default;
 //จำลองข้อมูลยูสเซอร์
 let user = [
     {id:"1",username : "thewin",lname :"zaza",password:"555",tel:"888-888" },
@@ -69,10 +69,23 @@ server.post('/check_authen',(request,respons)=>{
 server.get('/getsood',(request,response)=>{
      let jwtStatus = token_manager.checkAuthentication(request);
      if(jwtStatus != false){
-        return response.status(200).json({
-            statusCode:200,
-            result:user
-        })
+         let url = 'https://jsonplaceholder.typicode.com/posts';
+          axios.get(url).then((res)=>{
+                const count = res.data.length;
+                if(count != 0){
+                    return response.status(200).json({
+                      count:count,
+                      result:res.data
+                    });
+                }else{
+                    return response.status(401).json({
+                        Message:"No data"
+                    })
+                }
+               
+          }).catch((err)=>{
+             console.log(err.message)
+          })
      }else{
         return response.status(404).json({message:false})
      }
